@@ -47,6 +47,7 @@
         .btn-borrar { background: var(--rojo); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; margin-top: 0.8rem; cursor: pointer; font-size: 0.9rem; }
         .btn-cerrar { position: absolute; top: 1.5rem; right: 1.5rem; background: var(--rojo); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; }
         .btn-vaciar { background: var(--rojo); color: white; border: none; padding: 0.7rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; cursor: pointer; font-weight: 1rem; }
+        .btn-actualizar { background: var(--oro); color: var(--negro); border: none; padding: 0.7rem 1.2rem; border-radius: 8px; margin-bottom: 1rem; cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem; }
         .sin-citas { text-align: center; padding: 3rem; color: #888; font-size: 1.2rem; }
         
         footer { background: #000; text-align: center; padding: 2rem; color: #666; font-size: 0.9rem; margin-top: 3rem; }
@@ -172,6 +173,7 @@
             </div>
             <div id="adminContenido" style="display:none;">
                 <h2 style="text-align:left; margin-bottom:1rem;">📋 TUS CITAS AGENDADAS</h2>
+                <button class="btn-actualizar" onclick="renderReservas()">🔄 ACTUALIZAR CITAS</button>
                 <button class="btn-vaciar" onclick="if(confirm('¿Eliminar TODAS las citas?')){borrarTodasCitas();}">🗑️ VACIAR TODAS LAS CITAS</button>
                 <div class="admin-lista" id="listaReservas"></div>
             </div>
@@ -182,7 +184,7 @@
         // 🔐 CONTRASEÑA DE ADMINISTRADOR — SOLO TÚ
         const PASS_ADMIN = 'julianfade2026';
 
-        // ☁️ TUS CLAVES DE FIREBASE — ¡YA ESTÁN LISTAS!
+        // ☁️ TUS CLAVES DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyA7TwFC7fXjJD9HECnr1h0mtC9CLbouNps",
             authDomain: "julian-fade.firebaseapp.com",
@@ -309,7 +311,7 @@
             const [nombreServicio, duracion] = servicioVal.split('|');
             const minutosServicio = parseInt(duracion);
 
-            // ☁️ GUARDAR EN LA NUBE — TODOS LO VEN AL INSTANTE
+            // ☁️ GUARDAR EN LA NUBE
             await db.collection(coleccion).add({
                 fecha,
                 hora,
@@ -356,35 +358,42 @@
             if(pass === PASS_ADMIN) {
                 document.getElementById('adminLogin').style.display = 'none';
                 document.getElementById('adminContenido').style.display = 'block';
-                renderReservas();
+                renderReservas(); // ✅ CARGA AUTOMÁTICA AL ENTRAR
             } else {
                 alert('❌ Contraseña incorrecta');
             }
         }
 
-        // 📋 MOSTRAR CITAS DESDE LA NUBE
+        // 📋 MOSTRAR CITAS DESDE LA NUBE — CARGA SEGURA
         async function renderReservas() {
             const lista = document.getElementById('listaReservas');
-            const snap = await db.collection(coleccion).orderBy('fecha', 'asc').orderBy('hora', 'asc').get();
-            const reservas = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            lista.innerHTML = '<div class="cargando">🔄 Cargando citas...</div>';
+            
+            try {
+                const snap = await db.collection(coleccion).orderBy('fecha', 'asc').orderBy('hora', 'asc').get();
+                const reservas = snap.docs.map(d => ({id: d.id, ...d.data()}));
 
-            if(reservas.length === 0) {
-                lista.innerHTML = '<div class="sin-citas">📭 No hay citas agendadas todavía</div>';
-                return;
-            }
+                if(reservas.length === 0) {
+                    lista.innerHTML = '<div class="sin-citas">📭 No hay citas agendadas todavía</div>';
+                    return;
+                }
 
-            lista.innerHTML = reservas.map(r => `
-                <div class="reserva-item">
-                    <div class="reserva-fecha">📅 ${r.fecha} — 🕐 ${r.hora}</div>
-                    <div class="reserva-datos">
-                        <div><strong>👤 Cliente:</strong> ${r.nombre}</div>
-                        <div><strong>📲 Teléfono:</strong> ${r.telefono}</div>
-                        <div><strong>✂️ Servicio:</strong> ${r.servicio}</div>
-                        <div><strong>⏱️ Duración:</strong> ${r.minutosServicio} min</div>
+                lista.innerHTML = reservas.map(r => `
+                    <div class="reserva-item">
+                        <div class="reserva-fecha">📅 ${r.fecha} — 🕐 ${r.hora}</div>
+                        <div class="reserva-datos">
+                            <div><strong>👤 Cliente:</strong> ${r.nombre}</div>
+                            <div><strong>📲 Teléfono:</strong> ${r.telefono}</div>
+                            <div><strong>✂️ Servicio:</strong> ${r.servicio}</div>
+                            <div><strong>⏱️ Duración:</strong> ${r.minutosServicio} min</div>
+                        </div>
+                        <button class="btn-borrar" onclick="borrarCita('${r.id}')">🗑️ Eliminar esta cita</button>
                     </div>
-                    <button class="btn-borrar" onclick="borrarCita('${r.id}')">🗑️ Eliminar esta cita</button>
-                </div>
-            `).join('');
+                `).join('');
+            } catch(error) {
+                lista.innerHTML = `<div class="sin-citas">❌ Error al cargar: ${error.message}</div>`;
+                console.error(error);
+            }
         }
 
         // 🗑️ ELIMINAR CITA DE LA NUBE
@@ -416,7 +425,7 @@
             if(e.key === 'Enter') verificarAdmin();
         });
 
-        // 🔄 ESCUCHAR CAMBIOS EN TIEMPO REAL — si alguien agenda, se actualiza SOLO
+        // 🔄 ESCUCHAR CAMBIOS EN TIEMPO REAL
         db.collection(coleccion).onSnapshot(() => {
             if(document.getElementById('adminContenido').style.display === 'block') {
                 renderReservas();
