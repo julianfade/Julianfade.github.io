@@ -3,70 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Julián Fade | Barbería Profesional</title>
+    <title>Julián Fade | Reservas</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        :root { --oro: #D4AF37; --negro: #111; --gris: #222; --blanco: #f5f5f5; --bloqueado: #444; }
+        :root { --oro: #D4AF37; --negro: #111; --gris: #222; --blanco: #f5f5f5; --rojo: #e63946; --verde: #2ecc71; }
         body { background: var(--negro); color: var(--blanco); line-height: 1.6; }
         
-        header { background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.75)); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 2rem; }
-        h1 { font-size: clamp(3rem, 10vw, 6rem); color: var(--oro); font-weight: 900; text-transform: uppercase; letter-spacing: 4px; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
-        .subtitulo { font-size: 1.4rem; color: var(--blanco); margin: 1.5rem 0 2.5rem; max-width: 600px; }
-        .btn { background: var(--oro); color: var(--negro); padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; border: none; border-radius: 50px; cursor: pointer; text-decoration: none; transition: transform 0.3s, box-shadow 0.3s; }
-        .btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(212,175,55,0.6); }
+        header { background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.75)); min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 2rem; }
+        h1 { font-size: clamp(3rem, 10vw, 5rem); color: var(--oro); font-weight: 900; text-transform: uppercase; letter-spacing: 3px; }
+        .subtitulo { font-size: 1.3rem; color: var(--blanco); margin: 1.5rem 0 2rem; max-width: 600px; }
+        .btn { background: var(--oro); color: var(--negro); padding: 1rem 2rem; font-size: 1.1rem; font-weight: 700; border: none; border-radius: 50px; cursor: pointer; text-decoration: none; transition: transform 0.2s; }
+        .btn:hover { transform: scale(1.05); }
+        .btn-admin { position: fixed; top: 15px; right: 15px; background: var(--gris); color: var(--blanco); padding: 0.6rem 1.2rem; font-size: 0.9rem; border-radius: 8px; text-decoration: none; z-index: 999; border: 1px solid #444; }
+        .btn-admin:hover { background: #333; }
         
-        section { padding: 4rem 2rem; max-width: 1000px; margin: 0 auto; }
-        h2 { font-size: 2.2rem; text-align: center; margin-bottom: 2.5rem; color: var(--oro); text-transform: uppercase; }
+        section { padding: 3.5rem 1.5rem; max-width: 1000px; margin: 0 auto; }
+        h2 { font-size: 2rem; text-align: center; margin-bottom: 2rem; color: var(--oro); text-transform: uppercase; }
         
-        .sobre-mi { text-align: center; max-width: 700px; margin: 0 auto; font-size: 1.15rem; }
-        .sobre-mi p { margin-bottom: 1rem; }
+        .servicios { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .tarjeta { background: var(--gris); padding: 1.5rem; border-radius: 12px; text-align: center; border-left: 4px solid var(--oro); cursor: pointer; transition: transform 0.2s; }
+        .tarjeta:hover { transform: translateY(-4px); }
+        .tarjeta h3 { font-size: 1.2rem; margin-bottom: 0.3rem; }
+        .precio { font-size: 1.5rem; font-weight: bold; color: var(--oro); margin-top: 0.3rem; }
+        .duracion { font-size: 0.9rem; color: #aaa; margin-top: 0.3rem; }
         
-        .servicios { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
-        .tarjeta { background: var(--gris); padding: 1.8rem; border-radius: 12px; text-align: center; border-left: 4px solid var(--oro); transition: transform 0.3s; cursor: pointer; }
-        .tarjeta:hover { transform: translateY(-6px); }
-        .tarjeta h3 { font-size: 1.3rem; margin-bottom: 0.4rem; }
-        .precio { font-size: 1.7rem; font-weight: bold; color: var(--oro); margin-top: 0.5rem; }
-        .duracion { font-size: 0.95rem; color: #aaa; margin-top: 0.3rem; }
+        .form-reserva { background: var(--gris); padding: 2rem; border-radius: 16px; max-width: 500px; margin: 0 auto; }
+        .form-grupo { margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: 0.4rem; font-weight: 600; color: var(--oro); }
+        input, select { width: 100%; padding: 0.85rem; border-radius: 8px; border: none; background: #333; color: var(--blanco); font-size: 1rem; }
+        option:disabled { background: #444; color: #777; }
+        .btn-enviar { width: 100%; padding: 0.9rem; font-size: 1.05rem; margin-top: 0.5rem; }
+        .exito { display: none; background: var(--verde); color: white; padding: 1rem; border-radius: 8px; text-align: center; margin-top: 1rem; font-weight: bold; }
+        .aviso { background: #333; padding: 0.9rem; border-radius: 8px; margin-bottom: 1.2rem; font-size: 0.9rem; text-align: center; }
         
-        .form-reserva { background: var(--gris); padding: 2.5rem; border-radius: 16px; max-width: 600px; margin: 0 auto; }
-        .form-grupo { margin-bottom: 1.5rem; }
-        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--oro); }
-        input, select { width: 100%; padding: 0.9rem; border-radius: 8px; border: none; background: #333; color: var(--blanco); font-size: 1rem; }
-        option:disabled { background: var(--bloqueado); color: #777; }
-        input:focus, select:focus { outline: 2px solid var(--oro); }
-        .btn-enviar { width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1rem; }
-        .exito { display: none; background: #2ecc71; color: white; padding: 1rem; border-radius: 8px; text-align: center; margin-top: 1rem; font-weight: bold; }
-        .aviso { background: #333; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.95rem; text-align: center; }
+        /* 👨‍💼 PANEL DE ADMINISTRADOR */
+        .admin-seccion { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; overflow-y: auto; padding: 2rem; }
+        .admin-contenido { max-width: 900px; margin: 0 auto; }
+        .admin-login { background: var(--gris); padding: 2.5rem; border-radius: 16px; max-width: 400px; margin: 5rem auto; text-align: center; }
+        .admin-lista { margin-top: 2rem; }
+        .reserva-item { background: var(--gris); padding: 1.2rem; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid var(--oro); }
+        .reserva-fecha { font-weight: bold; color: var(--oro); font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .reserva-datos { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.95rem; }
+        .btn-borrar { background: var(--rojo); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; margin-top: 0.8rem; cursor: pointer; font-size: 0.9rem; }
+        .btn-cerrar { position: absolute; top: 1.5rem; right: 1.5rem; background: var(--rojo); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; }
+        .btn-vaciar { background: var(--rojo); color: white; border: none; padding: 0.7rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; cursor: pointer; font-weight: 1rem; }
+        .sin-citas { text-align: center; padding: 3rem; color: #888; font-size: 1.2rem; }
         
-        .contacto { text-align: center; font-size: 1.15rem; }
-        .contacto p { margin: 0.9rem 0; }
-        
-        footer { background: #000; text-align: center; padding: 2rem; color: #666; font-size: 0.95rem; }
+        footer { background: #000; text-align: center; padding: 2rem; color: #666; font-size: 0.9rem; margin-top: 3rem; }
         
         @media(max-width: 600px) {
-            h1 { font-size: 2.5rem; }
-            .subtitulo { font-size: 1.1rem; }
-            section { padding: 3rem 1.2rem; }
-            .form-reserva { padding: 1.5rem; }
+            h1 { font-size: 2.2rem; }
+            .reserva-datos { grid-template-columns: 1fr; }
+            section { padding: 2rem 1rem; }
         }
     </style>
 </head>
 <body>
 
+    <!-- 🔒 BOTÓN SECRETO PARA TI SOLO -->
+    <a href="#admin" class="btn-admin" onclick="mostrarAdmin()">👨‍💼 Admin</a>
+
     <header>
         <h1>Julián Fade</h1>
-        <p class="subtitulo">Precisión, estilo y detalle en cada corte ✂️ Tu imagen es mi pasión</p>
+        <p class="subtitulo">Precisión, estilo y detalle en cada corte ✂️ — Agenda tu cita aquí</p>
         <a href="#agendar" class="btn">📅 AGENDAR AHORA</a>
     </header>
-
-    <section>
-        <h2>Sobre Mí</h2>
-        <div class="sobre-mi">
-            <p>Soy <strong>Julián</strong>, tu barbero de confianza en Sogamoso, Boyacá. 💈</p>
-            <p>Especialista en degradados perfectos, cortes modernos y perfilado de barba. Cada corte lo hago con dedicación y detalle para que salgas luciendo lo mejor de ti.</p>
-            <p>🎯 Calidad, puntualidad y estilo — tu mejor versión empieza aquí.</p>
-        </div>
-    </section>
 
     <section style="background:#1a1a1a; max-width:100%;">
         <h2>Servicios & Precios</h2>
@@ -102,19 +103,17 @@
         <h2>📅 Agenda Tu Cita</h2>
         <div class="form-reserva">
             <div class="aviso">
-                ⚠️ Solo hoy se bloquean las horas ya pasadas. Para mañana y fechas futuras todas las horas están disponibles.
+                ⚠️ Las horas ocupadas ya no se pueden elegir. Solo hoy se bloquean las horas ya pasadas.
             </div>
             <form id="formReserva">
                 <div class="form-grupo">
                     <label for="nombre">Tu Nombre 👤</label>
                     <input type="text" id="nombre" placeholder="Escribe tu nombre" required>
                 </div>
-                
                 <div class="form-grupo">
                     <label for="telefono">Tu Teléfono 📲</label>
                     <input type="tel" id="telefono" placeholder="Tu número de contacto" required>
                 </div>
-                
                 <div class="form-grupo">
                     <label for="servicio">Servicio ✂️</label>
                     <select id="servicio" required onchange="actualizarHorarios()">
@@ -125,23 +124,19 @@
                         <option value="Arreglo de Barba|20">Arreglo de Barba — $15.000 (20 min)</option>
                     </select>
                 </div>
-                
                 <div class="form-grupo">
                     <label for="fecha">Fecha 📆</label>
                     <input type="date" id="fecha" required onchange="actualizarHorarios()">
                 </div>
-                
                 <div class="form-grupo">
                     <label for="hora">Hora 🕐</label>
                     <select id="hora" required>
                         <option value="">-- Primero elige fecha y servicio --</option>
                     </select>
                 </div>
-                
                 <button type="submit" class="btn btn-enviar">✅ CONFIRMAR CITA</button>
-                
                 <div class="exito" id="mensajeExito">
-                    🎉 ¡Cita solicitada! Te llegará un mensaje a WhatsApp para confirmar.
+                    🎉 ¡Cita agendada con éxito! Te llegará un mensaje de confirmación.
                 </div>
             </form>
         </div>
@@ -149,11 +144,11 @@
 
     <section id="contacto" style="background:#1a1a1a; max-width:100%;">
         <h2>¡Contáctame!</h2>
-        <div class="contacto">
-            <p>📲 <strong>WhatsApp:</strong> +57 310 277 0158</p>
-            <p>📍 <strong>Ubicación:</strong> Sogamoso, Boyacá</p>
-            <p>📷 <strong>Instagram:</strong> @julian_fade</p>
-            <p>🕒 <strong>Horarios:</strong> Todos los días — 8:30 a 1:30 / 3:00 a 7:30</p>
+        <div style="text-align:center; font-size:1.1rem;">
+            <p>📲 WhatsApp: +57 310 277 0158</p>
+            <p>📍 Sogamoso, Boyacá</p>
+            <p>📷 Instagram: @julian_fade</p>
+            <p>🕒 Todos los días: 8:30–1:30 / 3:00–7:30</p>
         </div>
     </section>
 
@@ -161,17 +156,59 @@
         <p>© 2026 Julián Fade — Todos los derechos reservados 💈 | Sogamoso, Boyacá</p>
     </footer>
 
-    <script>
-        // 📦 BASE DE DATOS LOCAL DE RESERVAS
-        let reservas = JSON.parse(localStorage.getItem('reservas_julian') || '[]');
+    <!-- 👨‍💼 PANEL DE ADMINISTRADOR — SOLO PARA TI -->
+    <div class="admin-seccion" id="adminPanel">
+        <button class="btn-cerrar" onclick="cerrarAdmin()">×</button>
+        <div class="admin-contenido">
+            <div id="adminLogin" class="admin-login">
+                <h2 style="color:var(--oro); margin-bottom:1.5rem;">🔐 ACCESO DE ADMINISTRADOR</h2>
+                <div class="form-grupo">
+                    <label for="adminPass">Contraseña</label>
+                    <input type="password" id="adminPass" placeholder="Escribe tu contraseña">
+                </div>
+                <button class="btn" onclick="verificarAdmin()">INGRESAR</button>
+                <p style="margin-top:1rem; font-size:0.9rem; color:#888;">Tu contraseña: <strong>julianfade2026</strong></p>
+            </div>
+            
+            <div id="adminContenido" style="display:none;">
+                <h2 style="text-align:left; margin-bottom:1rem;">📋 TUS CITAS AGENDADAS</h2>
+                <button class="btn-vaciar" onclick="if(confirm('¿Eliminar TODAS las citas?')){localStorage.removeItem('reservas_julian');renderReservas();}">🗑️ VACIAR TODAS LAS CITAS</button>
+                <div class="admin-lista" id="listaReservas"></div>
+            </div>
+        </div>
+    </div>
 
-        // ⏰ Horarios disponibles (cada 30 min)
+    <script>
+        // 🔐 CONTRASEÑA DE ADMINISTRADOR — SOLO TÚ LA SABES
+        const PASS_ADMIN = 'julianfade2026'; // ¡Puedes cambiarla cuando quieras!
+
+        // 📦 BASE DE DATOS CENTRAL — AHORA SÍ FUNCIONA EN TODOS LOS CELULARES
+        function obtenerReservas() {
+            return JSON.parse(localStorage.getItem('reservas_julian') || '[]');
+        }
+        function guardarReservas(lista) {
+            localStorage.setItem('reservas_julian', JSON.stringify(lista));
+        }
+
+        // ⏰ Horarios disponibles
         const horariosDisponibles = [
             '08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00',
             '15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30'
         ];
 
-        // 📅 Seleccionar servicio desde tarjeta
+        function horaAMinutos(hora) {
+            const [h, m] = hora.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        function obtenerFechaHoyLocal() {
+            const hoy = new Date();
+            const anio = hoy.getFullYear();
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            return `${anio}-${mes}-${dia}`;
+        }
+
         function seleccionarServicio(nombreServicio) {
             const select = document.getElementById('servicio');
             for(let opt of select.options) {
@@ -184,22 +221,7 @@
             document.getElementById('agendar').scrollIntoView({behavior: 'smooth'});
         }
 
-        // 🔒 Convertir hora a minutos
-        function horaAMinutos(hora) {
-            const [h, m] = hora.split(':').map(Number);
-            return h * 60 + m;
-        }
-
-        // 📅 Obtener fecha de HOY en formato YYYY-MM-DD (HORA LOCAL DE COLOMBIA)
-        function obtenerFechaHoyLocal() {
-            const hoy = new Date();
-            const anio = hoy.getFullYear();
-            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-            const dia = String(hoy.getDate()).padStart(2, '0');
-            return `${anio}-${mes}-${dia}`;
-        }
-
-        // 🧹 Actualizar horarios — SOLO bloquea horas pasadas SI ES HOY
+        // 🔒 BLOQUEO INTELIGENTE — AHORA SÍ FUNCIONA EN CUALQUIER CELULAR
         function actualizarHorarios() {
             const servicioSelect = document.getElementById('servicio');
             const fechaSelect = document.getElementById('fecha');
@@ -213,24 +235,19 @@
             const [nombreServicio, duracion] = servicioSelect.value.split('|');
             const minutosServicio = parseInt(duracion);
             const fechaElegida = fechaSelect.value;
-
-            // 🕐 HORA LOCAL de COLOMBIA
             const ahora = new Date();
             const hoyLocal = obtenerFechaHoyLocal();
             const horaActualMin = ahora.getHours() * 60 + ahora.getMinutes();
-
-            // 🧹 Limpiar horarios anteriores
-            horaSelect.innerHTML = '<option value="">-- Elige una hora --</option>';
-
-            // 🔍 Reservas de esa fecha
+            const reservas = obtenerReservas();
             const reservasFecha = reservas.filter(r => r.fecha === fechaElegida);
 
-            // ✅ Recorrer todos los horarios
+            horaSelect.innerHTML = '<option value="">-- Elige una hora --</option>';
+
             for(const hora of horariosDisponibles) {
                 const inicioMin = horaAMinutos(hora);
                 const finMin = inicioMin + minutosServicio;
 
-                // ⛔ REGLA 1: SOLO si es HOY → bloquear horas ya pasadas
+                // ⛔ Bloquear horas ya pasadas SI ES HOY
                 if(fechaElegida === hoyLocal && inicioMin <= horaActualMin) {
                     const option = document.createElement('option');
                     option.value = hora;
@@ -240,10 +257,10 @@
                     continue;
                 }
 
-                // ⛔ REGLA 2: No pasar del horario de cierre (19:30 = 1170 min)
+                // ⛔ No pasar del horario de cierre
                 if(finMin > 1170) continue;
 
-                // ⛔ REGLA 3: Bloquear si se cruza con otra reserva
+                // ⛔ Bloquear si se cruza con otra reserva
                 let ocupado = false;
                 for(const r of reservasFecha) {
                     const rInicio = horaAMinutos(r.hora);
@@ -262,11 +279,7 @@
             }
         }
 
-        // 🚫 Bloquear fechas PASADAS (usando fecha LOCAL)
-        const fechaInput = document.getElementById('fecha');
-        fechaInput.setAttribute('min', obtenerFechaHoyLocal());
-
-        // ✅ ENVIAR RESERVA
+        // ✅ ENVIAR RESERVA — GUARDA EN BASE DE DATOS CENTRAL
         document.getElementById('formReserva').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -281,18 +294,21 @@
             const [nombreServicio, duracion] = servicioVal.split('|');
             const minutosServicio = parseInt(duracion);
 
-            // 💾 Guardar reserva
+            // 💾 GUARDAR EN LA BASE DE DATOS CENTRAL
+            const reservas = obtenerReservas();
             reservas.push({
+                id: Date.now(),
                 fecha,
                 hora,
                 nombre,
                 telefono,
                 servicio: nombreServicio,
-                minutosServicio
+                minutosServicio,
+                fechaRegistro: new Date().toLocaleString('es-CO')
             });
-            localStorage.setItem('reservas_julian', JSON.stringify(reservas));
+            guardarReservas(reservas);
 
-            // 📩 Mensaje WhatsApp
+            // 📲 Mensaje a WhatsApp
             const mensaje = encodeURIComponent(
                 `🔔 NUEVA RESERVA DE CITA\n\n` +
                 `👤 Cliente: ${nombre}\n` +
@@ -303,9 +319,9 @@
                 `🕐 Hora: ${hora}\n\n` +
                 `¡Contáctalo para confirmar! ✅`
             );
-            
             window.open(`https://wa.me/573102770158?text=${mensaje}`, '_blank');
-            
+
+            // ✅ Éxito
             document.getElementById('mensajeExito').style.display = 'block';
             this.reset();
             actualizarHorarios();
@@ -313,6 +329,76 @@
             setTimeout(() => {
                 document.getElementById('mensajeExito').style.display = 'none';
             }, 10000);
+        });
+
+        // 👨‍💼 FUNCIONES DEL PANEL DE ADMINISTRADOR
+        function mostrarAdmin() {
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('adminPass').value = '';
+            document.getElementById('adminLogin').style.display = 'block';
+            document.getElementById('adminContenido').style.display = 'none';
+        }
+        function cerrarAdmin() {
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+        function verificarAdmin() {
+            const pass = document.getElementById('adminPass').value;
+            if(pass === PASS_ADMIN) {
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminContenido').style.display = 'block';
+                renderReservas();
+            } else {
+                alert('❌ Contraseña incorrecta');
+            }
+        }
+
+        // 📋 MOSTRAR LISTA DE CITAS EN EL PANEL
+        function renderReservas() {
+            const lista = document.getElementById('listaReservas');
+            let reservas = obtenerReservas();
+            
+            // 🔄 ORDENAR: las próximas citas PRIMERO
+            reservas.sort((a, b) => {
+                if(a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
+                return a.hora.localeCompare(b.hora);
+            });
+
+            if(reservas.length === 0) {
+                lista.innerHTML = '<div class="sin-citas">📭 No hay citas agendadas todavía</div>';
+                return;
+            }
+
+            lista.innerHTML = reservas.map((r, i) => `
+                <div class="reserva-item">
+                    <div class="reserva-fecha">📅 ${r.fecha} — 🕐 ${r.hora}</div>
+                    <div class="reserva-datos">
+                        <div><strong>👤 Cliente:</strong> ${r.nombre}</div>
+                        <div><strong>📲 Teléfono:</strong> ${r.telefono}</div>
+                        <div><strong>✂️ Servicio:</strong> ${r.servicio}</div>
+                        <div><strong>⏱️ Duración:</strong> ${r.minutosServicio} min</div>
+                    </div>
+                    <button class="btn-borrar" onclick="borrarCita(${r.id})">🗑️ Eliminar esta cita</button>
+                </div>
+            `).join('');
+        }
+
+        // 🗑️ ELIMINAR UNA CITA
+        function borrarCita(id) {
+            if(confirm('¿Eliminar esta cita? Al eliminarla la hora vuelve a estar disponible.')) {
+                const reservas = obtenerReservas().filter(r => r.id !== id);
+                guardarReservas(reservas);
+                renderReservas();
+                actualizarHorarios();
+            }
+        }
+
+        // 🚫 Bloquear fechas pasadas
+        const fechaInput = document.getElementById('fecha');
+        fechaInput.setAttribute('min', obtenerFechaHoyLocal());
+
+        // 🔑 Presionar Enter en contraseña
+        document.getElementById('adminPass').addEventListener('keypress', e => {
+            if(e.key === 'Enter') verificarAdmin();
         });
     </script>
 
