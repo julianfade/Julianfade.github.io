@@ -358,20 +358,27 @@
             if(pass === PASS_ADMIN) {
                 document.getElementById('adminLogin').style.display = 'none';
                 document.getElementById('adminContenido').style.display = 'block';
-                renderReservas(); // ✅ CARGA AUTOMÁTICA AL ENTRAR
+                renderReservas();
             } else {
                 alert('❌ Contraseña incorrecta');
             }
         }
 
-        // 📋 MOSTRAR CITAS DESDE LA NUBE — CARGA SEGURA
+        // 📋 MOSTRAR CITAS — SIN NECESIDAD DE ÍNDICE ⭐
         async function renderReservas() {
             const lista = document.getElementById('listaReservas');
             lista.innerHTML = '<div class="cargando">🔄 Cargando citas...</div>';
             
             try {
-                const snap = await db.collection(coleccion).orderBy('fecha', 'asc').orderBy('hora', 'asc').get();
+                // ⭐ TRAE TODAS Y LAS ORDENA AQUÍ MISMO — SIN NECESIDAD DE ÍNDICE EN FIREBASE
+                const snap = await db.collection(coleccion).get();
                 const reservas = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                // 🔀 ORDENA MANUALMENTE por FECHA y HORA
+                reservas.sort((a, b) => {
+                    if(a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
+                    return a.hora.localeCompare(b.hora);
+                });
 
                 if(reservas.length === 0) {
                     lista.innerHTML = '<div class="sin-citas">📭 No hay citas agendadas todavía</div>';
