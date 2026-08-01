@@ -1,10 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Julián Fade | Reservas</title>
+    <script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         :root { --oro: #D4AF37; --negro: #111; --gris: #222; --blanco: #f5f5f5; --rojo: #e63946; --verde: #2ecc71; }
@@ -34,8 +35,8 @@
         .btn-enviar { width: 100%; padding: 0.9rem; font-size: 1.05rem; margin-top: 0.5rem; }
         .exito { display: none; background: var(--verde); color: white; padding: 1rem; border-radius: 8px; text-align: center; margin-top: 1rem; font-weight: bold; }
         .aviso { background: #333; padding: 0.9rem; border-radius: 8px; margin-bottom: 1.2rem; font-size: 0.9rem; text-align: center; }
+        .cargando { text-align: center; padding: 1rem; color: var(--oro); }
         
-        /* 👨‍💼 PANEL DE ADMINISTRADOR — TOTALMENTE OCULTO */
         .admin-seccion { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; overflow-y: auto; padding: 2rem; }
         .admin-contenido { max-width: 900px; margin: 0 auto; }
         .admin-login { background: var(--gris); padding: 2.5rem; border-radius: 16px; max-width: 400px; margin: 5rem auto; text-align: center; }
@@ -47,7 +48,6 @@
         .btn-cerrar { position: absolute; top: 1.5rem; right: 1.5rem; background: var(--rojo); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; }
         .btn-vaciar { background: var(--rojo); color: white; border: none; padding: 0.7rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; cursor: pointer; font-weight: 1rem; }
         .sin-citas { text-align: center; padding: 3rem; color: #888; font-size: 1.2rem; }
-        .admin-ayuda { font-size: 0.85rem; color: #666; margin-top: 1rem; }
         
         footer { background: #000; text-align: center; padding: 2rem; color: #666; font-size: 0.9rem; margin-top: 3rem; }
         
@@ -60,8 +60,8 @@
 </head>
 <body>
 
-    <!-- 🔒 BOTÓN OCULTO — SOLO TÚ SABES DÓNDE ESTÁ -->
-    <div style="position:fixed;top:5px;right:5px;width:35px;height:35px;cursor:pointer;opacity:0.05;z-index:999;" onclick="mostrarAdmin()"></div>
+    <!-- 🔒 BOTÓN INVISIBLE — SOLO TÚ SABES DÓNDE ESTÁ -->
+    <div style="position:fixed;top:5px;right:5px;width:35px;height:35px;cursor:pointer;opacity:0.03;z-index:999;" onclick="mostrarAdmin()"></div>
 
     <header>
         <h1>Julián Fade</h1>
@@ -103,8 +103,9 @@
         <h2>📅 Agenda Tu Cita</h2>
         <div class="form-reserva">
             <div class="aviso">
-                ⚠️ Las horas ocupadas se bloquean automáticamente. Solo hoy se bloquean las horas ya pasadas.
+                ⚠️ Las horas ocupadas se bloquean automáticamente para TODOS los clientes.
             </div>
+            <div id="cargandoHorarios" class="cargando">🔄 Cargando horarios disponibles...</div>
             <form id="formReserva">
                 <div class="form-grupo">
                     <label for="nombre">Tu Nombre 👤</label>
@@ -156,7 +157,7 @@
         <p>© 2026 Julián Fade — Todos los derechos reservados 💈 | Sogamoso, Boyacá</p>
     </footer>
 
-    <!-- 👨‍💼 PANEL DE ADMINISTRADOR — SOLO TÚ ENTRAS -->
+    <!-- 👨‍💼 PANEL DE ADMINISTRADOR — SOLO TÚ -->
     <div class="admin-seccion" id="adminPanel">
         <button class="btn-cerrar" onclick="cerrarAdmin()">×</button>
         <div class="admin-contenido">
@@ -167,31 +168,34 @@
                     <input type="password" id="adminPass" placeholder="Escribe tu contraseña" autocomplete="off">
                 </div>
                 <button class="btn" onclick="verificarAdmin()">INGRESAR</button>
-                <p class="admin-ayuda">🔒 Solo tú conoces la contraseña</p>
+                <p style="margin-top:1rem; font-size:0.85rem; color:#666;">🔒 Solo tú conoces la contraseña</p>
             </div>
-            
             <div id="adminContenido" style="display:none;">
                 <h2 style="text-align:left; margin-bottom:1rem;">📋 TUS CITAS AGENDADAS</h2>
-                <button class="btn-vaciar" onclick="if(confirm('¿Eliminar TODAS las citas?')){localStorage.removeItem('reservas_julian');renderReservas();}">🗑️ VACIAR TODAS LAS CITAS</button>
+                <button class="btn-vaciar" onclick="if(confirm('¿Eliminar TODAS las citas?')){borrarTodasCitas();}">🗑️ VACIAR TODAS LAS CITAS</button>
                 <div class="admin-lista" id="listaReservas"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // 🔐 CONTRASEÑA — SOLO TÚ LA SABES
+        // 🔐 CONTRASEÑA DE ADMINISTRADOR — SOLO TÚ
         const PASS_ADMIN = 'julianfade2026';
 
-        // 📦 BASE DE DATOS COMPARTIDA — USAMOS UN ENLACE PARA COMPARTIR
-        const CLAVE_COMPARTIDA = 'julianfade_reservas_2026';
-        
-        function obtenerReservas() {
-            const todas = localStorage.getItem(CLAVE_COMPARTIDA);
-            return todas ? JSON.parse(todas) : [];
-        }
-        function guardarReservas(lista) {
-            localStorage.setItem(CLAVE_COMPARTIDA, JSON.stringify(lista));
-        }
+        // ☁️ TUS CLAVES DE FIREBASE — ¡YA ESTÁN LISTAS!
+        const firebaseConfig = {
+            apiKey: "AIzaSyA7TwFC7fXjJD9HECnr1h0mtC9CLbouNps",
+            authDomain: "julian-fade.firebaseapp.com",
+            projectId: "julian-fade",
+            storageBucket: "julian-fade.firebasestorage.app",
+            messagingSenderId: "153022411859",
+            appId: "1:153022411859:web:042f5bad4e75d8257482a6"
+        };
+
+        // Inicializar Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const coleccion = 'reservas';
 
         // ⏰ Horarios disponibles
         const horariosDisponibles = [
@@ -224,16 +228,20 @@
             document.getElementById('agendar').scrollIntoView({behavior: 'smooth'});
         }
 
-        // 🔒 BLOQUEO DE HORARIOS — CORREGIDO
-        function actualizarHorarios() {
+        // 🔄 CARGAR HORARIOS DESDE LA NUBE
+        async function actualizarHorarios() {
             const servicioSelect = document.getElementById('servicio');
             const fechaSelect = document.getElementById('fecha');
             const horaSelect = document.getElementById('hora');
+            const cargando = document.getElementById('cargandoHorarios');
             
             if(!servicioSelect.value || !fechaSelect.value) {
                 horaSelect.innerHTML = '<option value="">-- Primero elige fecha y servicio --</option>';
+                cargando.style.display = 'none';
                 return;
             }
+
+            cargando.style.display = 'block';
 
             const [nombreServicio, duracion] = servicioSelect.value.split('|');
             const minutosServicio = parseInt(duracion);
@@ -241,10 +249,10 @@
             const ahora = new Date();
             const hoyLocal = obtenerFechaHoyLocal();
             const horaActualMin = ahora.getHours() * 60 + ahora.getMinutes();
-            
-            // 📥 TRAER TODAS LAS RESERVAS
-            const reservas = obtenerReservas();
-            const reservasFecha = reservas.filter(r => r.fecha === fechaElegida);
+
+            // 📥 TRAER CITAS DESDE LA NUBE
+            const snap = await db.collection(coleccion).where('fecha', '==', fechaElegida).get();
+            const reservasFecha = snap.docs.map(d => d.data());
 
             horaSelect.innerHTML = '<option value="">-- Elige una hora --</option>';
 
@@ -282,10 +290,12 @@
                 option.disabled = ocupado;
                 horaSelect.appendChild(option);
             }
+
+            cargando.style.display = 'none';
         }
 
-        // ✅ GUARDAR RESERVA
-        document.getElementById('formReserva').addEventListener('submit', function(e) {
+        // ✅ GUARDAR RESERVA EN LA NUBE
+        document.getElementById('formReserva').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const nombre = document.getElementById('nombre').value.trim();
@@ -299,20 +309,18 @@
             const [nombreServicio, duracion] = servicioVal.split('|');
             const minutosServicio = parseInt(duracion);
 
-            // 💾 GUARDAR
-            const reservas = obtenerReservas();
-            reservas.push({
-                id: Date.now(),
+            // ☁️ GUARDAR EN LA NUBE — TODOS LO VEN AL INSTANTE
+            await db.collection(coleccion).add({
                 fecha,
                 hora,
                 nombre,
                 telefono,
                 servicio: nombreServicio,
-                minutosServicio
+                minutosServicio,
+                fechaRegistro: new Date().toISOString()
             });
-            guardarReservas(reservas);
 
-            // 📲 Mensaje WhatsApp
+            // 📲 Mensaje a WhatsApp
             const mensaje = encodeURIComponent(
                 `🔔 NUEVA RESERVA DE CITA\n\n` +
                 `👤 Cliente: ${nombre}\n` +
@@ -333,7 +341,7 @@
             }, 10000);
         });
 
-        // 👨‍💼 PANEL ADMIN — SOLO TÚ
+        // 👨‍💼 PANEL DE ADMINISTRADOR — SOLO TÚ
         function mostrarAdmin() {
             document.getElementById('adminPanel').style.display = 'block';
             document.getElementById('adminPass').value = '';
@@ -354,11 +362,11 @@
             }
         }
 
-        // 📋 MOSTRAR CITAS
-        function renderReservas() {
+        // 📋 MOSTRAR CITAS DESDE LA NUBE
+        async function renderReservas() {
             const lista = document.getElementById('listaReservas');
-            let reservas = obtenerReservas();
-            reservas.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora));
+            const snap = await db.collection(coleccion).orderBy('fecha', 'asc').orderBy('hora', 'asc').get();
+            const reservas = snap.docs.map(d => ({id: d.id, ...d.data()}));
 
             if(reservas.length === 0) {
                 lista.innerHTML = '<div class="sin-citas">📭 No hay citas agendadas todavía</div>';
@@ -374,19 +382,29 @@
                         <div><strong>✂️ Servicio:</strong> ${r.servicio}</div>
                         <div><strong>⏱️ Duración:</strong> ${r.minutosServicio} min</div>
                     </div>
-                    <button class="btn-borrar" onclick="borrarCita(${r.id})">🗑️ Eliminar esta cita</button>
+                    <button class="btn-borrar" onclick="borrarCita('${r.id}')">🗑️ Eliminar esta cita</button>
                 </div>
             `).join('');
         }
 
-        // 🗑️ ELIMINAR CITA
-        function borrarCita(id) {
+        // 🗑️ ELIMINAR CITA DE LA NUBE
+        async function borrarCita(id) {
             if(confirm('¿Eliminar esta cita? La hora quedará libre.')) {
-                const reservas = obtenerReservas().filter(r => r.id !== id);
-                guardarReservas(reservas);
+                await db.collection(coleccion).doc(id).delete();
                 renderReservas();
                 actualizarHorarios();
             }
+        }
+
+        // 🗑️ BORRAR TODAS LAS CITAS
+        async function borrarTodasCitas() {
+            if(!confirm('¿ESTÁS SEGURO? Se borran TODAS las citas y no se pueden recuperar.')) return;
+            const snap = await db.collection(coleccion).get();
+            const batch = db.batch();
+            snap.docs.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+            renderReservas();
+            actualizarHorarios();
         }
 
         // 🚫 Bloquear fechas pasadas
@@ -396,6 +414,13 @@
         // 🔑 Enter para contraseña
         document.getElementById('adminPass').addEventListener('keypress', e => {
             if(e.key === 'Enter') verificarAdmin();
+        });
+
+        // 🔄 ESCUCHAR CAMBIOS EN TIEMPO REAL — si alguien agenda, se actualiza SOLO
+        db.collection(coleccion).onSnapshot(() => {
+            if(document.getElementById('adminContenido').style.display === 'block') {
+                renderReservas();
+            }
         });
     </script>
 
