@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julián Fade | Barbería Profesional</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        :root { --oro: #D4AF37; --negro: #111; --gris: #222; --blanco: #f5f5f5; --bloqueado: #444; }
+        body { background: var(--negro); color: var(--blanco); line-height: 1.6; }
+        
+        header { background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.75)); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 2rem; }
+        h1 { font-size: clamp(3rem, 10vw, 6rem); color: var(--oro); font-weight: 900; text-transform: uppercase; letter-spacing: 4px; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+        .subtitulo { font-size: 1.4rem; color: var(--blanco); margin: 1.5rem 0 2.5rem; max-width: 600px; }
+        .btn { background: var(--oro); color: var(--negro); padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; border: none; border-radius: 50px; cursor: pointer; text-decoration: none; transition: transform 0.3s, box-shadow 0.3s; }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(212,175,55,0.6); }
+        
+        section { padding: 4rem 2rem; max-width: 1000px; margin: 0 auto; }
+        h2 { font-size: 2.2rem; text-align: center; margin-bottom: 2.5rem; color: var(--oro); text-transform: uppercase; }
+        
+        .sobre-mi { text-align: center; max-width: 700px; margin: 0 auto; font-size: 1.15rem; }
+        .sobre-mi p { margin-bottom: 1rem; }
+        
+        .servicios { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
+        .tarjeta { background: var(--gris); padding: 1.8rem; border-radius: 12px; text-align: center; border-left: 4px solid var(--oro); transition: transform 0.3s; cursor: pointer; }
+        .tarjeta:hover { transform: translateY(-6px); }
+        .tarjeta h3 { font-size: 1.3rem; margin-bottom: 0.4rem; }
+        .precio { font-size: 1.7rem; font-weight: bold; color: var(--oro); margin-top: 0.5rem; }
+        .duracion { font-size: 0.95rem; color: #aaa; margin-top: 0.3rem; }
+        
+        .form-reserva { background: var(--gris); padding: 2.5rem; border-radius: 16px; max-width: 600px; margin: 0 auto; }
+        .form-grupo { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--oro); }
+        input, select { width: 100%; padding: 0.9rem; border-radius: 8px; border: none; background: #333; color: var(--blanco); font-size: 1rem; }
+        option:disabled { background: var(--bloqueado); color: #777; }
+        input:focus, select:focus { outline: 2px solid var(--oro); }
+        .btn-enviar { width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1rem; }
+        .exito { display: none; background: #2ecc71; color: white; padding: 1rem; border-radius: 8px; text-align: center; margin-top: 1rem; font-weight: bold; }
+        .aviso { background: #333; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.95rem; text-align: center; }
+        
+        .contacto { text-align: center; font-size: 1.15rem; }
+        .contacto p { margin: 0.9rem 0; }
+        
+        footer { background: #000; text-align: center; padding: 2rem; color: #666; font-size: 0.95rem; }
+        
+        @media(max-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            .subtitulo { font-size: 1.1rem; }
+            section { padding: 3rem 1.2rem; }
+            .form-reserva { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Julián Fade</h1>
+        <p class="subtitulo">Precisión, estilo y detalle en cada corte ✂️ Tu imagen es mi pasión</p>
+        <a href="#agendar" class="btn">📅 AGENDAR AHORA</a>
+    </header>
+
+    <section>
+        <h2>Sobre Mí</h2>
+        <div class="sobre-mi">
+            <p>Soy <strong>Julián</strong>, tu barbero de confianza en Sogamoso, Boyacá. 💈</p>
+            <p>Especialista en degradados perfectos, cortes modernos y perfilado de barba. Cada corte lo hago con dedicación y detalle para que salgas luciendo lo mejor de ti.</p>
+            <p>🎯 Calidad, puntualidad y estilo — tu mejor versión empieza aquí.</p>
+        </div>
+    </section>
+
+    <section style="background:#1a1a1a; max-width:100%;">
+        <h2>Servicios & Precios</h2>
+        <div class="servicios">
+            <div class="tarjeta" onclick="seleccionarServicio('Corte de Cabello')">
+                <h3>Corte de Cabello</h3>
+                <p>Degradado clásico o moderno</p>
+                <p class="precio">$ 25.000</p>
+                <p class="duracion">⏱️ 40 minutos</p>
+            </div>
+            <div class="tarjeta" onclick="seleccionarServicio('Corte + Barba')">
+                <h3>Corte + Barba</h3>
+                <p>Arreglo y perfilado completo</p>
+                <p class="precio">$ 40.000</p>
+                <p class="duracion">⏱️ 1 h 15 min</p>
+            </div>
+            <div class="tarjeta" onclick="seleccionarServicio('Corte Detallado')">
+                <h3>Corte Detallado</h3>
+                <p>Estilo personalizado con acabados premium</p>
+                <p class="precio">$ 45.000</p>
+                <p class="duracion">⏱️ 1 h 30 min</p>
+            </div>
+            <div class="tarjeta" onclick="seleccionarServicio('Arreglo de Barba')">
+                <h3>Arreglo de Barba</h3>
+                <p>Perfilado, línea y aceites</p>
+                <p class="precio">$ 15.000</p>
+                <p class="duracion">⏱️ 20 minutos</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="agendar">
+        <h2>📅 Agenda Tu Cita</h2>
+        <div class="form-reserva">
+            <div class="aviso">
+                ⚠️ Solo hoy se bloquean las horas ya pasadas. Para mañana y fechas futuras todas las horas están disponibles.
+            </div>
+            <form id="formReserva">
+                <div class="form-grupo">
+                    <label for="nombre">Tu Nombre 👤</label>
+                    <input type="text" id="nombre" placeholder="Escribe tu nombre" required>
+                </div>
+                
+                <div class="form-grupo">
+                    <label for="telefono">Tu Teléfono 📲</label>
+                    <input type="tel" id="telefono" placeholder="Tu número de contacto" required>
+                </div>
+                
+                <div class="form-grupo">
+                    <label for="servicio">Servicio ✂️</label>
+                    <select id="servicio" required onchange="actualizarHorarios()">
+                        <option value="">-- Elige un servicio --</option>
+                        <option value="Corte de Cabello|40">Corte de Cabello — $25.000 (40 min)</option>
+                        <option value="Corte + Barba|75">Corte + Barba — $40.000 (1 h 15 min)</option>
+                        <option value="Corte Detallado|90">Corte Detallado — $45.000 (1 h 30 min)</option>
+                        <option value="Arreglo de Barba|20">Arreglo de Barba — $15.000 (20 min)</option>
+                    </select>
+                </div>
+                
+                <div class="form-grupo">
+                    <label for="fecha">Fecha 📆</label>
+                    <input type="date" id="fecha" required onchange="actualizarHorarios()">
+                </div>
+                
+                <div class="form-grupo">
+                    <label for="hora">Hora 🕐</label>
+                    <select id="hora" required>
+                        <option value="">-- Primero elige fecha y servicio --</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-enviar">✅ CONFIRMAR CITA</button>
+                
+                <div class="exito" id="mensajeExito">
+                    🎉 ¡Cita solicitada! Te llegará un mensaje a WhatsApp para confirmar.
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section id="contacto" style="background:#1a1a1a; max-width:100%;">
+        <h2>¡Contáctame!</h2>
+        <div class="contacto">
+            <p>📲 <strong>WhatsApp:</strong> +57 310 277 0158</p>
+            <p>📍 <strong>Ubicación:</strong> Sogamoso, Boyacá</p>
+            <p>📷 <strong>Instagram:</strong> @julian_fade</p>
+            <p>🕒 <strong>Horarios:</strong> Todos los días — 8:30 a 1:30 / 3:00 a 7:30</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 Julián Fade — Todos los derechos reservados 💈 | Sogamoso, Boyacá</p>
+    </footer>
+
+    <script>
+        // 📦 BASE DE DATOS LOCAL DE RESERVAS
+        let reservas = JSON.parse(localStorage.getItem('reservas_julian') || '[]');
+
+        // ⏰ Horarios disponibles (cada 30 min)
+        const horariosDisponibles = [
+            '08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00',
+            '15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30'
+        ];
+
+        // 📅 Seleccionar servicio desde tarjeta
+        function seleccionarServicio(nombreServicio) {
+            const select = document.getElementById('servicio');
+            for(let opt of select.options) {
+                if(opt.value.startsWith(nombreServicio + '|')) {
+                    opt.selected = true;
+                    actualizarHorarios();
+                    break;
+                }
+            }
+            document.getElementById('agendar').scrollIntoView({behavior: 'smooth'});
+        }
+
+        // 🔒 Convertir hora a minutos
+        function horaAMinutos(hora) {
+            const [h, m] = hora.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        // 📅 Obtener fecha de HOY en formato YYYY-MM-DD (HORA LOCAL DE COLOMBIA)
+        function obtenerFechaHoyLocal() {
+            const hoy = new Date();
+            const anio = hoy.getFullYear();
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            return `${anio}-${mes}-${dia}`;
+        }
+
+        // 🧹 Actualizar horarios — SOLO bloquea horas pasadas SI ES HOY
+        function actualizarHorarios() {
+            const servicioSelect = document.getElementById('servicio');
+            const fechaSelect = document.getElementById('fecha');
+            const horaSelect = document.getElementById('hora');
+            
+            if(!servicioSelect.value || !fechaSelect.value) {
+                horaSelect.innerHTML = '<option value="">-- Primero elige fecha y servicio --</option>';
+                return;
+            }
+
+            const [nombreServicio, duracion] = servicioSelect.value.split('|');
+            const minutosServicio = parseInt(duracion);
+            const fechaElegida = fechaSelect.value;
+
+            // 🕐 HORA LOCAL de COLOMBIA
+            const ahora = new Date();
+            const hoyLocal = obtenerFechaHoyLocal();
+            const horaActualMin = ahora.getHours() * 60 + ahora.getMinutes();
+
+            // 🧹 Limpiar horarios anteriores
+            horaSelect.innerHTML = '<option value="">-- Elige una hora --</option>';
+
+            // 🔍 Reservas de esa fecha
+            const reservasFecha = reservas.filter(r => r.fecha === fechaElegida);
+
+            // ✅ Recorrer todos los horarios
+            for(const hora of horariosDisponibles) {
+                const inicioMin = horaAMinutos(hora);
+                const finMin = inicioMin + minutosServicio;
+
+                // ⛔ REGLA 1: SOLO si es HOY → bloquear horas ya pasadas
+                if(fechaElegida === hoyLocal && inicioMin <= horaActualMin) {
+                    const option = document.createElement('option');
+                    option.value = hora;
+                    option.textContent = `${hora} — YA PASÓ`;
+                    option.disabled = true;
+                    horaSelect.appendChild(option);
+                    continue;
+                }
+
+                // ⛔ REGLA 2: No pasar del horario de cierre (19:30 = 1170 min)
+                if(finMin > 1170) continue;
+
+                // ⛔ REGLA 3: Bloquear si se cruza con otra reserva
+                let ocupado = false;
+                for(const r of reservasFecha) {
+                    const rInicio = horaAMinutos(r.hora);
+                    const rFin = rInicio + r.minutosServicio;
+                    if(!(finMin <= rInicio || inicioMin >= rFin)) {
+                        ocupado = true;
+                        break;
+                    }
+                }
+
+                const option = document.createElement('option');
+                option.value = hora;
+                option.textContent = `${hora} ${ocupado ? '— OCUPADO' : ''}`;
+                option.disabled = ocupado;
+                horaSelect.appendChild(option);
+            }
+        }
+
+        // 🚫 Bloquear fechas PASADAS (usando fecha LOCAL)
+        const fechaInput = document.getElementById('fecha');
+        fechaInput.setAttribute('min', obtenerFechaHoyLocal());
+
+        // ✅ ENVIAR RESERVA
+        document.getElementById('formReserva').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('nombre').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const servicioVal = document.getElementById('servicio').value;
+            const hora = document.getElementById('hora').value;
+            const fecha = document.getElementById('fecha').value;
+            
+            if(!servicioVal || !hora || !fecha) return alert('Completa todos los campos');
+            
+            const [nombreServicio, duracion] = servicioVal.split('|');
+            const minutosServicio = parseInt(duracion);
+
+            // 💾 Guardar reserva
+            reservas.push({
+                fecha,
+                hora,
+                nombre,
+                telefono,
+                servicio: nombreServicio,
+                minutosServicio
+            });
+            localStorage.setItem('reservas_julian', JSON.stringify(reservas));
+
+            // 📩 Mensaje WhatsApp
+            const mensaje = encodeURIComponent(
+                `🔔 NUEVA RESERVA DE CITA\n\n` +
+                `👤 Cliente: ${nombre}\n` +
+                `📲 Teléfono: ${telefono}\n` +
+                `✂️ Servicio: ${nombreServicio}\n` +
+                `⏱️ Duración: ${minutosServicio} min\n` +
+                `📅 Fecha: ${fecha}\n` +
+                `🕐 Hora: ${hora}\n\n` +
+                `¡Contáctalo para confirmar! ✅`
+            );
+            
+            window.open(`https://wa.me/573102770158?text=${mensaje}`, '_blank');
+            
+            document.getElementById('mensajeExito').style.display = 'block';
+            this.reset();
+            actualizarHorarios();
+            
+            setTimeout(() => {
+                document.getElementById('mensajeExito').style.display = 'none';
+            }, 10000);
+        });
+    </script>
+
+</body>
+</html>
