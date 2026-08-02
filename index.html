@@ -104,7 +104,7 @@
         <h2>📅 Agenda Tu Cita</h2>
         <div class="form-reserva">
             <div class="aviso">
-                ⚠️ Las horas ocupadas se bloquean automáticamente para TODOS los clientes.
+                ✅ Cada turno 40 min — Último mañana 12:50 → Sales 1:30 PM 🍱 | Último tarde 7:20 → Sales 8:00 PM ⏰
             </div>
             <div id="cargandoHorarios" class="cargando">🔄 Cargando horarios disponibles...</div>
             <form id="formReserva">
@@ -150,7 +150,7 @@
             <p>📲 WhatsApp: +57 310 277 0158</p>
             <p>📍 Sogamoso, Boyacá</p>
             <p>📷 Instagram: @julian_fade</p>
-            <p>🕒 Todos los días: 8:30–1:30 / 3:00–7:30</p>
+            <p>🕒 Mañana: 8:30–1:30 | Tarde: 3:00–8:00</p>
         </div>
     </section>
 
@@ -181,10 +181,10 @@
     </div>
 
     <script>
-        // 🔐 CONTRASEÑA DE ADMINISTRADOR — SOLO TÚ
+        // 🔐 CONTRASEÑA DE ADMINISTRADOR
         const PASS_ADMIN = 'julianfade2026';
 
-        // ☁️ TUS CLAVES DE FIREBASE
+        // ☁️ FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyA7TwFC7fXjJD9HECnr1h0mtC9CLbouNps",
             authDomain: "julian-fade.firebaseapp.com",
@@ -194,20 +194,44 @@
             appId: "1:153022411859:web:042f5bad4e75d8257482a6"
         };
 
-        // Inicializar Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const coleccion = 'reservas';
 
-        // ⏰ Horarios disponibles
-        const horariosDisponibles = [
-            '08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00',
-            '15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30'
-        ];
+        // ⏰ HORARIOS CADA 40 MIN — ÚLTIMO MAÑANA 12:50, ÚLTIMO TARDE 7:20 ⭐
+        function generarHorarios() {
+            const horarios = [];
+            // MAÑANA: 8:30 a 12:50 → ÚLTIMO TURNO ANTES DE ALMORZAR 🍱
+            let hora = 8, minuto = 30;
+            while (hora < 13 || (hora === 13 && minuto <= 50)) {
+                horarios.push(`${String(hora).padStart(2,'0')}:${String(minuto).padStart(2,'0')}`);
+                minuto += 40;
+                if (minuto >= 60) { minuto -= 60; hora++; }
+            }
+            // TARDE: 3:00 a 7:20 → ÚLTIMO TURNO DEL DÍA 🏁
+            hora = 15; minuto = 0;
+            while (hora < 19 || (hora === 19 && minuto <= 20)) {
+                horarios.push(`${String(hora).padStart(2,'0')}:${String(minuto).padStart(2,'0')}`);
+                minuto += 40;
+                if (minuto >= 60) { minuto -= 60; hora++; }
+            }
+            return horarios;
+        }
+        const horariosDisponibles = generarHorarios();
+        const HORA_CIERRE_MAÑANA = 13 * 60 + 30; // 1:30 PM → ALMUERZO 🍱
+        const HORA_CIERRE_TARDE = 20 * 60;       // 8:00 PM → CIERRE 🏁
 
         function horaAMinutos(hora) {
             const [h, m] = hora.split(':').map(Number);
             return h * 60 + m;
+        }
+
+        function sumarMinutos(hora, minutos) {
+            let [h, m] = hora.split(':').map(Number);
+            m += minutos;
+            h += Math.floor(m / 60);
+            m = m % 60;
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
         }
 
         function obtenerFechaHoyLocal() {
@@ -230,7 +254,7 @@
             document.getElementById('agendar').scrollIntoView({behavior: 'smooth'});
         }
 
-        // 🔄 CARGAR HORARIOS DESDE LA NUBE
+        // 🔄 LÓGICA FINAL — RESPETO AL DESCANSO Y AL CIERRE ⭐
         async function actualizarHorarios() {
             const servicioSelect = document.getElementById('servicio');
             const fechaSelect = document.getElementById('fecha');
@@ -252,7 +276,7 @@
             const hoyLocal = obtenerFechaHoyLocal();
             const horaActualMin = ahora.getHours() * 60 + ahora.getMinutes();
 
-            // 📥 TRAER CITAS DESDE LA NUBE
+            // 📥 TRAER CITAS EXISTENTES
             const snap = await db.collection(coleccion).where('fecha', '==', fechaElegida).get();
             const reservasFecha = snap.docs.map(d => d.data());
 
@@ -262,25 +286,20 @@
                 const inicioMin = horaAMinutos(hora);
                 const finMin = inicioMin + minutosServicio;
 
-                // ⛔ Bloquear horas ya pasadas SI ES HOY
-                if(fechaElegida === hoyLocal && inicioMin <= horaActualMin) {
-                    const option = document.createElement('option');
-                    option.value = hora;
-                    option.textContent = `${hora} — YA PASÓ`;
-                    option.disabled = true;
-                    horaSelect.appendChild(option);
+                // ⛔ Bloquear horas ya pasadas hoy
+                if(fechaElegida === hoyLocal && inicioMin <= horaActualMin) continue;
+
+                // ⛔ NO PERMITIR SI TERMINA DESPUÉS DE ALMORZAR (1:30) o DESPUÉS DE CERRAR (8:00 PM) 🛡️
+                if ((inicioMin < HORA_CIERRE_MAÑANA && finMin > HORA_CIERRE_MAÑANA) || finMin > HORA_CIERRE_TARDE) {
                     continue;
                 }
 
-                // ⛔ No pasar del horario de cierre
-                if(finMin > 1170) continue;
-
-                // ⛔ Bloquear si se cruza con otra reserva
+                // ⛔ BLOQUEA SI SE CRUZA CON OTRA CITA
                 let ocupado = false;
                 for(const r of reservasFecha) {
                     const rInicio = horaAMinutos(r.hora);
                     const rFin = rInicio + r.minutosServicio;
-                    if(!(finMin <= rInicio || inicioMin >= rFin)) {
+                    if( !(finMin <= rInicio || inicioMin >= rFin) ) {
                         ocupado = true;
                         break;
                     }
@@ -288,7 +307,7 @@
 
                 const option = document.createElement('option');
                 option.value = hora;
-                option.textContent = `${hora} ${ocupado ? '— OCUPADO' : ''}`;
+                option.textContent = `${hora} → termina ${sumarMinutos(hora, minutosServicio)} ${ocupado ? '❌ OCUPADO' : '✅ DISPONIBLE'}`;
                 option.disabled = ocupado;
                 horaSelect.appendChild(option);
             }
@@ -296,7 +315,7 @@
             cargando.style.display = 'none';
         }
 
-        // ✅ GUARDAR RESERVA EN LA NUBE
+        // ✅ GUARDAR RESERVA
         document.getElementById('formReserva').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -311,7 +330,6 @@
             const [nombreServicio, duracion] = servicioVal.split('|');
             const minutosServicio = parseInt(duracion);
 
-            // ☁️ GUARDAR EN LA NUBE
             await db.collection(coleccion).add({
                 fecha,
                 hora,
@@ -322,7 +340,7 @@
                 fechaRegistro: new Date().toISOString()
             });
 
-            // 📲 Mensaje a WhatsApp
+            // 📲 AVISO A WHATSAPP
             const mensaje = encodeURIComponent(
                 `🔔 NUEVA RESERVA DE CITA\n\n` +
                 `👤 Cliente: ${nombre}\n` +
@@ -330,7 +348,7 @@
                 `✂️ Servicio: ${nombreServicio}\n` +
                 `⏱️ Duración: ${minutosServicio} min\n` +
                 `📅 Fecha: ${fecha}\n` +
-                `🕐 Hora: ${hora}`
+                `🕐 Hora: ${hora} — termina ${sumarMinutos(hora, minutosServicio)}`
             );
             window.open(`https://wa.me/573102770158?text=${mensaje}`, '_blank');
 
@@ -343,7 +361,7 @@
             }, 10000);
         });
 
-        // 👨‍💼 PANEL DE ADMINISTRADOR — SOLO TÚ
+        // 👨‍💼 PANEL ADMIN
         function mostrarAdmin() {
             document.getElementById('adminPanel').style.display = 'block';
             document.getElementById('adminPass').value = '';
@@ -364,17 +382,14 @@
             }
         }
 
-        // 📋 MOSTRAR CITAS — SIN NECESIDAD DE ÍNDICE ⭐
+        // 📋 VER CITAS
         async function renderReservas() {
             const lista = document.getElementById('listaReservas');
             lista.innerHTML = '<div class="cargando">🔄 Cargando citas...</div>';
             
             try {
-                // ⭐ TRAE TODAS Y LAS ORDENA AQUÍ MISMO — SIN NECESIDAD DE ÍNDICE EN FIREBASE
                 const snap = await db.collection(coleccion).get();
                 const reservas = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                
-                // 🔀 ORDENA MANUALMENTE por FECHA y HORA
                 reservas.sort((a, b) => {
                     if(a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
                     return a.hora.localeCompare(b.hora);
@@ -387,7 +402,7 @@
 
                 lista.innerHTML = reservas.map(r => `
                     <div class="reserva-item">
-                        <div class="reserva-fecha">📅 ${r.fecha} — 🕐 ${r.hora}</div>
+                        <div class="reserva-fecha">📅 ${r.fecha} — 🕐 ${r.hora} a ${sumarMinutos(r.hora, r.minutosServicio)}</div>
                         <div class="reserva-datos">
                             <div><strong>👤 Cliente:</strong> ${r.nombre}</div>
                             <div><strong>📲 Teléfono:</strong> ${r.telefono}</div>
@@ -403,7 +418,7 @@
             }
         }
 
-        // 🗑️ ELIMINAR CITA DE LA NUBE
+        // 🗑️ BORRAR CITA
         async function borrarCita(id) {
             if(confirm('¿Eliminar esta cita? La hora quedará libre.')) {
                 await db.collection(coleccion).doc(id).delete();
@@ -412,7 +427,7 @@
             }
         }
 
-        // 🗑️ BORRAR TODAS LAS CITAS
+        // 🗑️ BORRAR TODO
         async function borrarTodasCitas() {
             if(!confirm('¿ESTÁS SEGURO? Se borran TODAS las citas y no se pueden recuperar.')) return;
             const snap = await db.collection(coleccion).get();
@@ -432,11 +447,12 @@
             if(e.key === 'Enter') verificarAdmin();
         });
 
-        // 🔄 ESCUCHAR CAMBIOS EN TIEMPO REAL
+        // 🔄 ACTUALIZAR EN TIEMPO REAL
         db.collection(coleccion).onSnapshot(() => {
             if(document.getElementById('adminContenido').style.display === 'block') {
                 renderReservas();
             }
+            actualizarHorarios();
         });
     </script>
 
